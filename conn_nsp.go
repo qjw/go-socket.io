@@ -1,7 +1,6 @@
 package socketio
 
 import (
-	"context"
 	"reflect"
 	"sync"
 	"sync/atomic"
@@ -17,8 +16,8 @@ type Namespace interface {
 	// connection, and share it between all handlers. The handlers
 	// are called in one goroutine, so no need to lock context if it
 	// only accessed in one connection.
-	Context() context.Context
-	SetContext(ctx context.Context)
+	Context() interface{}
+	SetContext(ctx interface{})
 
 	Namespace() string
 	Emit(eventName string, v ...interface{})
@@ -36,7 +35,7 @@ type namespaceConn struct {
 	pkgID     atomic.Uint64
 
 	namespace string
-	context   context.Context
+	context   interface{}
 
 	ack sync.Map
 }
@@ -49,11 +48,11 @@ func newNamespaceConn(conn *conn, namespace string, broadcast Broadcaster) *name
 	}
 }
 
-func (nc *namespaceConn) SetContext(ctx context.Context) {
+func (nc *namespaceConn) SetContext(ctx interface{}) {
 	nc.context = ctx
 }
 
-func (nc *namespaceConn) Context() context.Context {
+func (nc *namespaceConn) Context() interface{} {
 	return nc.context
 }
 

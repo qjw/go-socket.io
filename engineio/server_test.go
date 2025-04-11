@@ -1,6 +1,7 @@
 package engineio
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -22,6 +23,7 @@ import (
 )
 
 func TestEnginePolling(t *testing.T) {
+	ctx := context.Background()
 	should := assert.New(t)
 	must := require.New(t)
 
@@ -40,7 +42,7 @@ func TestEnginePolling(t *testing.T) {
 		should := assert.New(t)
 		must := require.New(t)
 
-		conn, err := svr.Accept()
+		conn, err := svr.Accept(ctx)
 		must.Nil(err)
 		defer conn.Close()
 
@@ -93,6 +95,7 @@ func TestEnginePolling(t *testing.T) {
 }
 
 func TestEngineWebsocket(t *testing.T) {
+	ctx := context.Background()
 	should := assert.New(t)
 	must := require.New(t)
 
@@ -114,7 +117,7 @@ func TestEngineWebsocket(t *testing.T) {
 		should := assert.New(t)
 		must := require.New(t)
 
-		conn, err := svr.Accept()
+		conn, err := svr.Accept(ctx)
 		must.Nil(err)
 		defer conn.Close()
 
@@ -187,6 +190,7 @@ func TestEngineWebsocket(t *testing.T) {
 }
 
 func TestEngineUpgrade(t *testing.T) {
+	ctx := context.Background()
 	should := assert.New(t)
 	must := require.New(t)
 
@@ -206,7 +210,7 @@ func TestEngineUpgrade(t *testing.T) {
 		should := assert.New(t)
 		must := require.New(t)
 
-		conn, err := svr.Accept()
+		conn, err := svr.Accept(ctx)
 		must.Nil(err)
 		defer conn.Close()
 
