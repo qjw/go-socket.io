@@ -8,7 +8,9 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/go-logr/logr"
 	redis "github.com/redis/go-redis/v9"
+	"github.com/vchitai/go-socket.io/v4/logger"
 )
 
 func newRedisBroadcastRemoteV9(
@@ -39,6 +41,7 @@ func newRedisBroadcastRemoteV9(
 		key:        fmt.Sprintf("%s#%s#%s", opts.Prefix, nsp, rbcLocal.uid),
 		local:      rbcLocal,
 		requests:   make(map[string]interface{}),
+		logger:     logger.GetLogger("redisBroadcastRemoteV9"),
 	}
 
 	if err := subConn.Subscribe(ctx, rbc.reqChannel, rbc.resChannel); err != nil {
@@ -59,6 +62,7 @@ type redisBroadcastRemoteV9 struct {
 	resChannel string
 	requests   map[string]interface{}
 	local      *broadcastLocal
+	logger     logr.Logger
 }
 
 func (bc *redisBroadcastRemoteV9) lenRoom(room string) int {
@@ -139,11 +143,13 @@ func (bc *redisBroadcastRemoteV9) onMessage(channel string, msg []byte) error {
 	channelParts := strings.Split(channel, "#")
 	nsp := channelParts[len(channelParts)-2]
 	if bc.local.nsp != nsp {
+		bc.logger.Info("[redisBroadcast] onMessage nsp '%s' != '%s' ", bc.local.nsp, nsp)
 		return nil
 	}
 
 	uid := channelParts[len(channelParts)-1]
 	if bc.local.uid == uid {
+		bc.logger.Info("[redisBroadcast] onMessage uid '%s' != '%s' ", bc.local.uid, uid)
 		return nil
 	}
 
@@ -332,14 +338,17 @@ func (bc *redisBroadcastRemoteV9) dispatch() {
 			default:
 				err := bc.onMessage(m.Channel, []byte(m.Payload))
 				if err != nil {
+					bc.logger.Error(err, "onMessage channel '%s' fail", m.Channel)
 					return
 				}
 			}
 		case *redis.Subscription:
 			if m.Count == 0 {
+				bc.logger.Info("onMessage redis.Subscription == 0")
 				return
 			}
 		case error:
+			bc.logger.Error(m, "ChannelWithSubscriptions fail")
 			return
 		}
 	}

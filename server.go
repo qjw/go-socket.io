@@ -1,6 +1,7 @@
 package socketio
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/vchitai/go-socket.io/v4/engineio"
@@ -64,9 +65,9 @@ func (s *Server) OnEvent(namespace string, event string, f interface{}) {
 }
 
 // Serve serves go-socket.io server.
-func (s *Server) Serve() error {
+func (s *Server) Serve(ctx context.Context) error {
 	for {
-		conn, err := s.engine.Accept()
+		conn, err := s.engine.Accept(ctx)
 		//todo maybe need check EOF from Accept()
 		if err != nil {
 			return err
@@ -128,6 +129,16 @@ func (s *Server) RoomLen(namespace string, room string) int {
 func (s *Server) Rooms(namespace string) []string {
 	nspHandler := s.getNamespaceHandler(namespace)
 	return nspHandler.Rooms(nil)
+}
+
+// Rooms gives list of one rooms.
+func (s *Server) ConnRooms(namespace string, connection Conn) []string {
+	nspHandler := s.getNamespaceHandler(namespace)
+	if nspHandler != nil {
+		return nspHandler.Rooms(connection)
+	}
+
+	return nil
 }
 
 // ForEach sends data by DataFunc, if room does not exit sends anything.

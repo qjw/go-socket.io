@@ -1,11 +1,10 @@
 module github.com/vchitai/go-socket.io/v4
 
-go 1.19
+go 1.22
 
 require (
 	github.com/go-logr/logr v1.2.3
 	github.com/go-logr/stdr v1.2.2
-	github.com/gomodule/redigo v1.8.9
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/redis/go-redis/v9 v9.0.2
