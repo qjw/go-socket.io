@@ -143,13 +143,12 @@ func (bc *redisBroadcastRemoteV9) onMessage(channel string, msg []byte) error {
 	channelParts := strings.Split(channel, "#")
 	nsp := channelParts[len(channelParts)-2]
 	if bc.local.nsp != nsp {
-		bc.logger.Info("[redisBroadcast] onMessage nsp '%s' != '%s' ", bc.local.nsp, nsp)
+		bc.logger.Info("[redisBroadcast] onMessage nsp not equal", bc.local.nsp, nsp)
 		return nil
 	}
 
 	uid := channelParts[len(channelParts)-1]
 	if bc.local.uid == uid {
-		bc.logger.Info("[redisBroadcast] onMessage uid '%s' != '%s' ", bc.local.uid, uid)
 		return nil
 	}
 
@@ -172,6 +171,7 @@ func (bc *redisBroadcastRemoteV9) onMessage(channel string, msg []byte) error {
 		return errors.New("invalid event")
 	}
 
+	bc.logger.Info("onMessage", "room", room, " event", event, "args", args)
 	if room != "" {
 		bc.local.send(room, event, args...)
 	} else {
@@ -338,7 +338,7 @@ func (bc *redisBroadcastRemoteV9) dispatch() {
 			default:
 				err := bc.onMessage(m.Channel, []byte(m.Payload))
 				if err != nil {
-					bc.logger.Error(err, "onMessage channel '%s' fail", m.Channel)
+					bc.logger.Error(err, "onMessage fail", "channel", m.Channel)
 					return
 				}
 			}
